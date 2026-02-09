@@ -77,8 +77,6 @@ bash-5.2.32/examples/loadables/whoami
 bash-5.2.32/po/Makefile.in
 bash-5.2.32/po/POTFILES
 
-# Deployment archive
-yosh-debian12-x86_64.tar.gz
 
 # Installed prefix (except the yosh binary which we track)
 prefix/bin/bashbug
