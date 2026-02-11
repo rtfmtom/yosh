@@ -1,0 +1,70 @@
+# Use postgres/example user/password credentials
+
+volumes:
+  database-data:
+  redis-data:
+
+networks:
+  stack:
+    name: stack
+    external: false
+
+services:
+  database:
+    container_name: database
+    image: postgres:16
+    restart: always
+    volumes:
+      - database-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=unicorn_user
+      - POSTGRES_PASSWORD=magical_password
+      - POSTGRES_DB=calendso
+    networks:
+      - stack
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: always
+    volumes:
+      - redis-data:/data
+    networks:
+      - stack
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+
+  calcom:
+    container_name: calcom
+    image: calcom.docker.scarf.sh/calcom/cal.com
+    restart: always
+    networks:
+      - stack
+    ports:
+      - 3000:3000
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://unicorn_user:magical_password@database:5432/calendso
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - database
+      - redis
+
+  # Optional use of Prisma Studio. In production, comment out or remove the section below to prevent unwanted access to your database.
+  studio:
+    image: calcom.docker.scarf.sh/calcom/cal.com
+    restart: always
+    networks:
+      - stack
+    ports:
+      - 5555:5555
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://unicorn_user:magical_password@database:5432/calendso
+    depends_on:
+      - database
+    command:
+      - npx
+      - prisma
+      - studio
+# END SECTION: Optional use of Prisma Studio.
